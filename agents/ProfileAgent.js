@@ -1,4 +1,4 @@
-const { User, ChatHistory } = require('../src/models/User');
+const { User } = require('../server/models/User');
 
 class ProfileAgent {
     constructor() {}
@@ -10,15 +10,15 @@ class ProfileAgent {
     }
 
     async getChatHistory(username) {
-        return await ChatHistory.getHistory(username);
+        return await User.getChatHistory(username);
     }
 
     async saveChatMessagePair(username, userContent, assistantContent, category) {
-        await ChatHistory.addMessagePair(username, userContent, assistantContent, category);
+        await User.addMessagePair(username, userContent, assistantContent, category);
     }
 
     async clearChatHistory(username) {
-        return await ChatHistory.clearHistory(username);
+        return await User.clearChatHistory(username);
     }
 }
 

@@ -9,6 +9,7 @@ class AuthService {
             const user = await User.create(username, password);
             return { success: true, user };
         } catch (error) {
+            console.error('Registration error:', error);
             return { success: false, error: error.message };
         }
     }
@@ -25,9 +26,14 @@ class AuthService {
                 return { success: false, error: 'Invalid credentials' };
             }
             
-            const token = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign({ 
+                id: user._id,
+                username: user.username 
+            }, JWT_SECRET, { expiresIn: '1h' });
+            
             return { success: true, token, username: user.username };
         } catch (error) {
+            console.error('Login error:', error);
             return { success: false, error: 'Server error' };
         }
     }

@@ -10,7 +10,7 @@ const Signup = ({ setToken }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/api/signup', { username, password });
+            await axios.post('/api/register', { username, password });
             setMessage('Signup successful! Please login.');
             setError('');
         } catch (err) {

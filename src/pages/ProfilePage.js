@@ -148,10 +148,12 @@ const ProfilePage = () => {
         const fetchHistory = async () => {
             try {
                 const data = await getChatHistory(token);
-                if (Array.isArray(data) && data.length > 0 && Array.isArray(data[0].messages)) {
-                    setConversations(data);
-                } else {
+                // data should be an array of message pairs directly from the ChatHistory
+                if (Array.isArray(data)) {
+                    // Wrap the messages in a conversation structure for consistency
                     setConversations([{ messages: data }]);
+                } else {
+                    setConversations([{ messages: [] }]);
                 }
             } catch (err) {
                 console.error(err);
@@ -174,17 +176,36 @@ const ProfilePage = () => {
 
     if (loading) return <div style={{ textAlign: 'center', marginTop: '80px' }}>Loading...</div>;
 
-    const totalChats = Array.isArray(conversations) ? conversations.length : 0;
+    // Count the actual message pairs (each pair is one chat conversation)
+    const totalChats = Array.isArray(conversations) && conversations.length > 0 && Array.isArray(conversations[0].messages) 
+        ? conversations[0].messages.length 
+        : 0;
 
-    // Use specific categories: refrigerator, dishwasher, payment, products, order-support, warranty
-    const categories = ['refrigerator', 'dishwasher', 'payment', 'products', 'order-support', 'warranty'];
+    // Calculate category counts from message pairs
+    const categoryCounts = {};
+    const categories = ['refrigerator', 'dishwasher', 'payment', 'products', 'order-support', 'warranty', 'general'];
+    
+    categories.forEach(cat => categoryCounts[cat] = 0);
+    
+    if (Array.isArray(conversations) && conversations.length > 0 && Array.isArray(conversations[0].messages)) {
+        conversations[0].messages.forEach(messagePair => {
+            const category = messagePair.category || 'general';
+            if (categoryCounts[category] !== undefined) {
+                categoryCounts[category]++;
+            } else {
+                categoryCounts['general']++;
+            }
+        });
+    }
+
+    const totalCategories = Object.values(categoryCounts).filter(count => count > 0).length;
 
     const filteredConversations = categoryFilter === 'all'
         ? conversations
         : conversations.map(conv => ({
             ...conv,
             messages: Array.isArray(conv.messages)
-                ? conv.messages.filter(msg => (msg.category || 'general') === categoryFilter)
+                ? conv.messages.filter(messagePair => (messagePair.category || 'general') === categoryFilter)
                 : []
         })).filter(conv => conv.messages.length > 0);
 
@@ -197,7 +218,10 @@ const ProfilePage = () => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '16px' }}>
                     <div style={{ background: 'linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%)', borderRadius: '16px', padding: '22px 38px', boxShadow: '0 4px 16px rgba(60,80,120,0.10)', fontWeight: 700, color: '#1b3875', fontSize: '1.25rem', fontFamily: 'inherit' }}>
-                        <span aria-label="chat" title="Chats" style={{ fontSize: '1.5rem', marginRight: '8px' }}>�</span> Chats: {filteredConversations.length}
+                        <span aria-label="chat" title="Chats" style={{ fontSize: '1.5rem', marginRight: '8px' }}>💬</span> Chats: {categoryFilter === 'all' ? totalChats : (filteredConversations[0]?.messages?.length || 0)}
+                    </div>
+                    <div style={{ background: 'linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%)', borderRadius: '16px', padding: '22px 38px', boxShadow: '0 4px 16px rgba(60,80,120,0.10)', fontWeight: 700, color: '#1b3875', fontSize: '1.25rem', fontFamily: 'inherit' }}>
+                        <span aria-label="categories" title="Categories" style={{ fontSize: '1.5rem', marginRight: '8px' }}>📋</span> Categories: {totalCategories}
                     </div>
                 </div>
                 <div style={{ textAlign: 'left', margin: '0 48px' }}>
@@ -255,7 +279,7 @@ const ProfilePage = () => {
                             }}
                             onClick={() => setCategoryFilter('refrigerator')}
                         >
-                            🧊 Refrigerator
+                            🧊 Refrigerator ({categoryCounts.refrigerator})
                         </button>
                         <button
                             style={{ 
@@ -271,7 +295,7 @@ const ProfilePage = () => {
                             }}
                             onClick={() => setCategoryFilter('dishwasher')}
                         >
-                            🍽️ Dishwasher
+                            🍽️ Dishwasher ({categoryCounts.dishwasher})
                         </button>
                         <button
                             style={{ 
@@ -287,7 +311,7 @@ const ProfilePage = () => {
                             }}
                             onClick={() => setCategoryFilter('payment')}
                         >
-                            💳 Payment
+                            💳 Payment ({categoryCounts.payment})
                         </button>
                         <button
                             style={{ 
@@ -303,7 +327,7 @@ const ProfilePage = () => {
                             }}
                             onClick={() => setCategoryFilter('products')}
                         >
-                            📦 Products
+                            📦 Products ({categoryCounts.products})
                         </button>
                         <button
                             style={{ 
@@ -319,7 +343,7 @@ const ProfilePage = () => {
                             }}
                             onClick={() => setCategoryFilter('order-support')}
                         >
-                            🚚 Order Support
+                            🚚 Order Support ({categoryCounts['order-support']})
                         </button>
                         <button
                             style={{ 
@@ -335,10 +359,10 @@ const ProfilePage = () => {
                             }}
                             onClick={() => setCategoryFilter('warranty')}
                         >
-                            🛡️ Warranty
+                            🛡️ Warranty ({categoryCounts.warranty})
                         </button>
                     </div>
-                    {(!Array.isArray(filteredConversations) || filteredConversations.length === 0) && (
+                    {(!Array.isArray(filteredConversations) || filteredConversations.length === 0 || (filteredConversations[0] && filteredConversations[0].messages && filteredConversations[0].messages.length === 0)) && (
                         <div style={{ textAlign: 'center', color: '#555', fontSize: '1.2rem' }}>No chat history yet.</div>
                     )}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -378,7 +402,7 @@ const ProfilePage = () => {
                                         )}
                                     </div>
                                     <div style={{ position: 'absolute', top: '18px', right: '32px', color: '#888', fontSize: '0.95rem', fontWeight: 500 }}>
-                                        {conv.messages ? conv.messages.length : 0} messages
+                                        {conv.messages ? conv.messages.length : 0} conversations
                                     </div>
                                 </div>
                             );

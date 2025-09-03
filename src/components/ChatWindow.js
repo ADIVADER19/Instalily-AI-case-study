@@ -80,10 +80,10 @@ const ChatWindow = ({ token }) => {
               className="chat-avatar"
               src={
                 msg.role === "user"
-                  ? "https://ui-avatars.com/api/?name=You"
-                  : "https://ui-avatars.com/api/?name=AI"
+                  ? "https://ui-avatars.com/api/?name=U&background=1b3875&color=fff"
+                  : "https://ui-avatars.com/api/?name=AI&background=e0eafc&color=1b3875"
               }
-              alt={msg.role}
+              alt={msg.role === "user" ? "U" : "AI"}
             />
             <div className="chat-content">
               {msg.role === 'assistant' ? (
@@ -96,7 +96,7 @@ const ChatWindow = ({ token }) => {
         ))}
         {loading && (
           <div className="chat-message assistant">
-            <img className="chat-avatar" src="https://ui-avatars.com/api/?name=AI" alt="AI" />
+            <img className="chat-avatar" src="https://ui-avatars.com/api/?name=AI&background=e0eafc&color=1b3875" alt="AI" />
             <div className="chat-content">
               <div className="chat-loader">
                 <span className="chat-loader-text">AI is thinking</span>

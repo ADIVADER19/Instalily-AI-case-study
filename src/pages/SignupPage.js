@@ -12,7 +12,7 @@ const SignupPage = () => {
     const handleSignup = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/api/signup', { username, password });
+            await axios.post('/api/register', { username, password });
             Swal.fire({
                 icon: 'success',
                 title: 'Account Created!',

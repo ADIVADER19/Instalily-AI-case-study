@@ -1,82 +1,115 @@
 
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+// Client-side User model for API interactions
+import axios from 'axios';
 
-
-const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    messages: [
-        {
-            user: {
-                content: { type: String, required: true },
-                timestamp: { type: Date, default: Date.now },
-            },
-            assistant: {
-                content: { type: String, required: true },
-                timestamp: { type: Date, default: Date.now },
-            },
-            category: { type: String },
-        }
-    ]
-});
-
-const UserModel = mongoose.model('User', userSchema);
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 const User = {
-    async create(username, password) {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const existing = await UserModel.findOne({ username });
-        if (existing) {
-            throw new Error('User already exists');
+    async register(username, password) {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/register`, {
+                username,
+                password
+            });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Registration failed' 
+            };
         }
-        const user = new UserModel({ username, password: hashedPassword });
-        await user.save();
-        return { username };
     },
 
-    async findByUsername(username) {
-        return await UserModel.findOne({ username });
+    async login(username, password) {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/login`, {
+                username,
+                password
+            });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Login failed' 
+            };
+        }
     },
 
-    async verifyPassword(storedPassword, providedPassword) {
-        return await bcrypt.compare(providedPassword, storedPassword);
+    async logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        return { success: true };
+    },
+
+    getStoredToken() {
+        return localStorage.getItem('token');
+    },
+
+    getStoredUsername() {
+        return localStorage.getItem('username');
+    },
+
+    isLoggedIn() {
+        return !!this.getStoredToken();
     }
 };
-
-
-
 
 const ChatHistory = {
     async addMessagePair(username, userContent, assistantContent, category) {
-        let userDoc = await UserModel.findOne({ username });
-        if (!userDoc) return;
-        userDoc.messages.push({
-            user: {
-                content: userContent,
-                timestamp: Date.now(),
-            },
-            assistant: {
-                content: assistantContent,
-                timestamp: Date.now(),
-            },
-            category: category || 'general',
-        });
-        await userDoc.save();
+        try {
+            const token = User.getStoredToken();
+            const response = await axios.post(`${API_BASE_URL}/chat/history`, {
+                username,
+                userContent,
+                assistantContent,
+                category: category || 'general'
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Failed to save message' 
+            };
+        }
     },
 
     async getHistory(username) {
-        const userDoc = await UserModel.findOne({ username });
-        return userDoc ? userDoc.messages : [];
+        try {
+            const token = User.getStoredToken();
+            const response = await axios.get(`${API_BASE_URL}/chat/history/${username}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Failed to get history' 
+            };
+        }
     },
 
     async clearHistory(username) {
-        const userDoc = await UserModel.findOne({ username });
-        if (!userDoc) return;
-        userDoc.messages = [];
-        await userDoc.save();
-        return { message: 'Chat history cleared successfully' };
+        try {
+            const token = User.getStoredToken();
+            const response = await axios.delete(`${API_BASE_URL}/chat/history/${username}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return { success: true, data: response.data };
+        } catch (error) {
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Failed to clear history' 
+            };
+        }
     }
 };
 
-module.exports = { User, ChatHistory };
+export { User, ChatHistory };
