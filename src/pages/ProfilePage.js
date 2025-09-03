@@ -176,8 +176,8 @@ const ProfilePage = () => {
 
     const totalChats = Array.isArray(conversations) ? conversations.length : 0;
 
-    // Use specific categories: refrigerator, dishwasher, payment
-    const categories = ['refrigerator', 'dishwasher', 'payment'];
+    // Use specific categories: refrigerator, dishwasher, payment, products, order-support, warranty
+    const categories = ['refrigerator', 'dishwasher', 'payment', 'products', 'order-support', 'warranty'];
 
     const filteredConversations = categoryFilter === 'all'
         ? conversations
@@ -288,6 +288,54 @@ const ProfilePage = () => {
                             onClick={() => setCategoryFilter('payment')}
                         >
                             💳 Payment
+                        </button>
+                        <button
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'products' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'products' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onClick={() => setCategoryFilter('products')}
+                        >
+                            📦 Products
+                        </button>
+                        <button
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'order-support' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'order-support' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onClick={() => setCategoryFilter('order-support')}
+                        >
+                            🚚 Order Support
+                        </button>
+                        <button
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'warranty' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'warranty' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onClick={() => setCategoryFilter('warranty')}
+                        >
+                            🛡️ Warranty
                         </button>
                     </div>
                     {(!Array.isArray(filteredConversations) || filteredConversations.length === 0) && (

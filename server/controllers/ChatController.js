@@ -54,6 +54,42 @@ class ChatController {
             res.status(500).json({ error: error.message });
         }
     }
+
+    static async getProductInfo(req, res) {
+        try {
+            const { message } = req.body;
+            const { username } = req.user;
+            
+            const result = await ChatService.getProductInfo(message, username);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async getOrderSupport(req, res) {
+        try {
+            const { message } = req.body;
+            const { username } = req.user;
+            
+            const result = await ChatService.getOrderSupport(message, username);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async getWarrantySupport(req, res) {
+        try {
+            const { message } = req.body;
+            const { username } = req.user;
+            
+            const result = await ChatService.getWarrantySupport(message, username);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 module.exports = ChatController;

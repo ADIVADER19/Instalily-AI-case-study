@@ -3,6 +3,9 @@ const ProfileAgent = require('../../agents/ProfileAgent');
 const RecommendationAgent = require('../../agents/RecommendationAgent');
 const TroubleshootingAgent = require('../../agents/TroubleshootingAgent');
 const PaymentAgent = require('../../agents/PaymentAgent');
+const ProductAgent = require('../../agents/ProductAgent');
+const OrderSupportAgent = require('../../agents/OrderSupportAgent');
+const WarrantyAgent = require('../../agents/WarrantyAgent');
 const axios = require('axios');
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
@@ -12,6 +15,9 @@ const profileAgent = new ProfileAgent();
 const recommendationAgent = new RecommendationAgent(DEEPSEEK_API_KEY);
 const troubleshootingAgent = new TroubleshootingAgent(DEEPSEEK_API_KEY);
 const paymentAgent = new PaymentAgent(DEEPSEEK_API_KEY);
+const productAgent = new ProductAgent(DEEPSEEK_API_KEY);
+const orderSupportAgent = new OrderSupportAgent(DEEPSEEK_API_KEY);
+const warrantyAgent = new WarrantyAgent(DEEPSEEK_API_KEY);
 
 class ChatService {
     static async classifyCategory(message) {
@@ -22,12 +28,15 @@ Your task is to categorize customer messages into exactly ONE of these categorie
 1. "refrigerator" - Messages about refrigerator parts, repairs, troubleshooting, recommendations, ice makers, water filters, cooling issues, etc.
 2. "dishwasher" - Messages about dishwasher parts, repairs, troubleshooting, recommendations, cleaning issues, drainage problems, etc.  
 3. "payment" - Messages about billing, payments, refunds, pricing, orders, shipping, account issues, etc.
+4. "products" - Messages about product specifications, features, comparisons, compatibility, availability, technical details, installation requirements, warranties, etc.
+5. "order-support" - Messages about order tracking, shipping status, delivery issues, order modifications, returns, exchanges, missing packages, etc.
+6. "warranty" - Messages about warranty coverage, claims, documentation, warranty registration, extended warranties, warranty repairs, coverage verification, etc.
 
 IMPORTANT RULES:
-- Respond with ONLY the category name (refrigerator, dishwasher, or payment)
+- Respond with ONLY the category name (refrigerator, dishwasher, payment, products, order-support, or warranty)
 - No explanations, no additional text
 - If unsure, choose the most relevant category
-- Default to "refrigerator" if the message is unclear but seems appliance-related
+- Default to "products" if the message is unclear but seems product-related
 
 Customer message: "${message}"
 
@@ -55,14 +64,14 @@ Category:`;
             
             const category = response.data.choices[0].message.content.trim().toLowerCase();
             
-            if (['refrigerator', 'dishwasher', 'payment'].includes(category)) {
+            if (['refrigerator', 'dishwasher', 'payment', 'products', 'order-support', 'warranty'].includes(category)) {
                 return category;
             } else {
-                return 'refrigerator';
+                return 'products';
             }
         } catch (error) {
             console.error('Category classification error:', error);
-            return 'refrigerator';
+            return 'products';
         }
     }
 
@@ -82,6 +91,12 @@ Category:`;
                 assistantMessage = await troubleshootingAgent.troubleshootIssue(message, contextMessages.map(m => m.user?.content || ''));
             } else if (category === 'payment') {
                 assistantMessage = await paymentAgent.handlePaymentQuery(message, contextMessages.map(m => m.user?.content || ''));
+            } else if (category === 'products') {
+                assistantMessage = await productAgent.getProductInfo(message, contextMessages.map(m => m.user?.content || ''));
+            } else if (category === 'order-support') {
+                assistantMessage = await orderSupportAgent.handleOrderSupport(message, contextMessages.map(m => m.user?.content || ''));
+            } else if (category === 'warranty') {
+                assistantMessage = await warrantyAgent.handleWarrantyQuery(message, contextMessages.map(m => m.user?.content || ''));
             } else {
                 assistantMessage = await chatAgent.getResponse(message, contextMessages.map(m => m.user?.content || ''));
             }
@@ -140,6 +155,48 @@ Category:`;
         } catch (error) {
             console.error('Error clearing chat history:', error);
             throw new Error('Failed to clear chat history.');
+        }
+    }
+
+    static async getProductInfo(message, username) {
+        try {
+            const contextMessages = await profileAgent.getChatHistory(username);
+            const productInfo = await productAgent.getProductInfo(
+                message, 
+                contextMessages.map(m => m.content)
+            );
+            return { productInfo };
+        } catch (error) {
+            console.error('Error in product agent:', error);
+            throw new Error('Failed to get product information.');
+        }
+    }
+
+    static async getOrderSupport(message, username) {
+        try {
+            const contextMessages = await profileAgent.getChatHistory(username);
+            const orderSupport = await orderSupportAgent.handleOrderSupport(
+                message, 
+                contextMessages.map(m => m.content)
+            );
+            return { orderSupport };
+        } catch (error) {
+            console.error('Error in order support agent:', error);
+            throw new Error('Failed to get order support.');
+        }
+    }
+
+    static async getWarrantySupport(message, username) {
+        try {
+            const contextMessages = await profileAgent.getChatHistory(username);
+            const warrantySupport = await warrantyAgent.handleWarrantyQuery(
+                message, 
+                contextMessages.map(m => m.content)
+            );
+            return { warrantySupport };
+        } catch (error) {
+            console.error('Error in warranty agent:', error);
+            throw new Error('Failed to get warranty support.');
         }
     }
 }

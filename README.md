@@ -15,10 +15,13 @@ A modern AI-powered customer support platform built with React and Node.js, feat
 - **🧊 Refrigerator Agent**: Expert assistance for refrigerator parts, repairs, and troubleshooting
 - **🍽️ Dishwasher Agent**: Specialized support for dishwasher issues and maintenance
 - **💳 Payment Agent**: Handles billing, payments, refunds, and account-related queries
+- **📦 Product Agent**: Provides detailed product information, specifications, and recommendations
+- **🚚 Order Support Agent**: Assists with order tracking, shipping, delivery, and order management
+- **🛡️ Warranty Agent**: Handles warranty claims, coverage verification, and documentation assistance
 
 ### User Interface
 - **Responsive Design**: Mobile-first approach with modern CSS styling
-- **Category Filtering**: Filter chat history by refrigerator, dishwasher, or payment categories
+- **Category Filtering**: Filter chat history by refrigerator, dishwasher, payment, products, order support, or warranty categories
 - **Clear History**: Option to clear all chat history with confirmation
 - **Real-time Chat**: Interactive chat interface with message formatting
 - **Profile Management**: User profile with conversation history and statistics
@@ -63,6 +66,9 @@ A modern AI-powered customer support platform built with React and Node.js, feat
     ├── RecommendationAgent.js # Refrigerator support
     ├── TroubleshootingAgent.js # Dishwasher support
     ├── PaymentAgent.js   # Payment queries
+    ├── ProductAgent.js   # Product information
+    ├── OrderSupportAgent.js # Order and shipping support
+    ├── WarrantyAgent.js  # Warranty claims and coverage
     └── ProfileAgent.js   # User profile management
 ```
 
@@ -133,6 +139,9 @@ DEEPSEEK_API_KEY=your_deepseek_api_key
 ### Specialized Endpoints
 - `POST /api/recommend` - Get refrigerator recommendations
 - `POST /api/troubleshoot` - Get dishwasher troubleshooting
+- `POST /api/products` - Get product information and specifications
+- `POST /api/order-support` - Get order tracking and shipping support
+- `POST /api/warranty` - Get warranty assistance and claim support
 
 ## 🔮 AI Intelligence Features
 
@@ -141,12 +150,18 @@ The system automatically classifies user messages into categories:
 - **Refrigerator**: Parts, repairs, cooling issues, ice makers, water filters
 - **Dishwasher**: Cleaning issues, drainage problems, maintenance
 - **Payment**: Billing, refunds, pricing, orders, account issues
+- **Products**: Product specifications, features, compatibility, warranties
+- **Order Support**: Order tracking, shipping, delivery, returns, exchanges
+- **Warranty**: Warranty claims, coverage verification, documentation, extended warranties
 
 ### Context-Aware Responses
 Each AI agent maintains conversation context and provides specialized knowledge:
 - **Recommendation Agent**: Suggests refrigerator parts and solutions
 - **Troubleshooting Agent**: Provides step-by-step dishwasher repair guidance
 - **Payment Agent**: Handles financial queries and account management
+- **Product Agent**: Delivers detailed product specifications and comparisons
+- **Order Support Agent**: Manages order tracking and shipping inquiries
+- **Warranty Agent**: Assists with warranty claims and coverage verification
 
 ## 📱 User Experience
 

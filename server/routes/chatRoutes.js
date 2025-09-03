@@ -9,5 +9,8 @@ router.get('/chat/history', authenticateToken, ChatController.getHistory);
 router.delete('/chat/history', authenticateToken, ChatController.clearHistory);
 router.post('/recommend', authenticateToken, ChatController.recommend);
 router.post('/troubleshoot', authenticateToken, ChatController.troubleshoot);
+router.post('/products', authenticateToken, ChatController.getProductInfo);
+router.post('/order-support', authenticateToken, ChatController.getOrderSupport);
+router.post('/warranty', authenticateToken, ChatController.getWarrantySupport);
 
 module.exports = router;
