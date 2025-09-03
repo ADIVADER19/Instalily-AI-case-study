@@ -1,4 +1,4 @@
-# Instalily AI - Intelligent Customer Support Platform
+# Instalily AI - Case Study
 
 A modern AI-powered customer support platform built with React and Node.js, featuring intelligent message classification and specialized AI agents for different service categories.
 
@@ -146,7 +146,7 @@ DEEPSEEK_API_KEY=your_deepseek_api_key
 ## 🔮 AI Intelligence Features
 
 ### Message Classification
-The system automatically classifies user messages into categories:
+The system automatically classifies user messages:
 - **Refrigerator**: Parts, repairs, cooling issues, ice makers, water filters
 - **Dishwasher**: Cleaning issues, drainage problems, maintenance
 - **Payment**: Billing, refunds, pricing, orders, account issues
@@ -205,7 +205,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-For support, email your-email@example.com or create an issue in the GitHub repository.
+For support, email advaitnurani@gmail.com or create an issue in the GitHub repository.
 
 ---
 
