@@ -1,8 +1,8 @@
-const ChatAgent = require('../agents/ChatAgent');
-const ProfileAgent = require('../agents/ProfileAgent');
-const RecommendationAgent = require('../agents/RecommendationAgent');
-const TroubleshootingAgent = require('../agents/TroubleshootingAgent');
-const PaymentAgent = require('../agents/PaymentAgent');
+const ChatAgent = require('../../agents/ChatAgent');
+const ProfileAgent = require('../../agents/ProfileAgent');
+const RecommendationAgent = require('../../agents/RecommendationAgent');
+const TroubleshootingAgent = require('../../agents/TroubleshootingAgent');
+const PaymentAgent = require('../../agents/PaymentAgent');
 const axios = require('axios');
 
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
@@ -66,67 +66,42 @@ Category:`;
         }
     }
 
-    static async processMessage(message, username) {
-        try {
-            if (!DEEPSEEK_API_KEY) {
-                return { 
-                    success: false, 
-                    error: 'Deepseek API key not configured.' 
-                };
-            }
+    static async processChat(message, username) {
+        if (!DEEPSEEK_API_KEY) {
+            throw new Error('Deepseek API key not configured.');
+        }
 
+        try {
             const contextMessages = await profileAgent.getChatHistory(username);
             const category = await this.classifyCategory(message);
             let assistantMessage;
 
             if (category === 'refrigerator') {
-                assistantMessage = await recommendationAgent.recommendParts(
-                    message, 
-                    contextMessages.map(m => m.user?.content || '')
-                );
+                assistantMessage = await recommendationAgent.recommendParts(message, contextMessages.map(m => m.user?.content || ''));
             } else if (category === 'dishwasher') {
-                assistantMessage = await troubleshootingAgent.troubleshootIssue(
-                    message, 
-                    contextMessages.map(m => m.user?.content || '')
-                );
+                assistantMessage = await troubleshootingAgent.troubleshootIssue(message, contextMessages.map(m => m.user?.content || ''));
             } else if (category === 'payment') {
-                assistantMessage = await paymentAgent.handlePaymentQuery(
-                    message, 
-                    contextMessages.map(m => m.user?.content || '')
-                );
+                assistantMessage = await paymentAgent.handlePaymentQuery(message, contextMessages.map(m => m.user?.content || ''));
             } else {
-                assistantMessage = await chatAgent.getResponse(
-                    message, 
-                    contextMessages.map(m => m.user?.content || '')
-                );
+                assistantMessage = await chatAgent.getResponse(message, contextMessages.map(m => m.user?.content || ''));
             }
 
             await profileAgent.saveChatMessagePair(username, message, assistantMessage, category);
 
-            return { 
-                success: true, 
-                response: assistantMessage, 
-                category 
-            };
+            return { response: assistantMessage, category };
         } catch (error) {
-            console.error('Error in chat service:', error);
-            return { 
-                success: false, 
-                error: 'Failed to get response from AI assistant.' 
-            };
+            console.error('Error in agentic chat:', error);
+            throw new Error('Failed to get response from AI assistant.');
         }
     }
 
     static async getChatHistory(username) {
         try {
             const history = await profileAgent.getChatHistory(username);
-            return { success: true, history };
+            return history;
         } catch (error) {
-            console.error('Error fetching chat history:', error);
-            return { 
-                success: false, 
-                error: 'Failed to retrieve chat history.' 
-            };
+            console.error('Error retrieving chat history:', error);
+            throw new Error('Failed to retrieve chat history.');
         }
     }
 
@@ -137,13 +112,10 @@ Category:`;
                 message, 
                 contextMessages.map(m => m.content)
             );
-            return { success: true, recommendation };
+            return { recommendation };
         } catch (error) {
-            console.error('Error in recommendation service:', error);
-            return { 
-                success: false, 
-                error: 'Failed to get recommendation.' 
-            };
+            console.error('Error in recommendation agent:', error);
+            throw new Error('Failed to get recommendation.');
         }
     }
 
@@ -154,13 +126,20 @@ Category:`;
                 message, 
                 contextMessages.map(m => m.content)
             );
-            return { success: true, troubleshooting };
+            return { troubleshooting };
         } catch (error) {
-            console.error('Error in troubleshooting service:', error);
-            return { 
-                success: false, 
-                error: 'Failed to get troubleshooting advice.' 
-            };
+            console.error('Error in troubleshooting agent:', error);
+            throw new Error('Failed to get troubleshooting advice.');
+        }
+    }
+
+    static async clearChatHistory(username) {
+        try {
+            await profileAgent.clearChatHistory(username);
+            return { message: 'Chat history cleared successfully' };
+        } catch (error) {
+            console.error('Error clearing chat history:', error);
+            throw new Error('Failed to clear chat history.');
         }
     }
 }

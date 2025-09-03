@@ -33,3 +33,13 @@ export const getChatHistory = async (token) => {
         throw error;
     }
 };
+
+export const clearChatHistory = async (token) => {
+    try {
+        const response = await axios.delete('/api/chat/history', getAuthHeaders(token));
+        return response.data;
+    } catch (error) {
+        console.error('Error clearing chat history:', error);
+        throw error;
+    }
+};

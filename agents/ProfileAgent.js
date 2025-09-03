@@ -16,6 +16,10 @@ class ProfileAgent {
     async saveChatMessagePair(username, userContent, assistantContent, category) {
         await ChatHistory.addMessagePair(username, userContent, assistantContent, category);
     }
+
+    async clearChatHistory(username) {
+        return await ChatHistory.clearHistory(username);
+    }
 }
 
 module.exports = ProfileAgent;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getChatHistory } from '../api/api';
+import { getChatHistory, clearChatHistory } from '../api/api';
 import PropTypes from 'prop-types';
 import Navbar from '../components/Navbar';
 import Swal from 'sweetalert2';
@@ -98,6 +98,52 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [categoryFilter, setCategoryFilter] = useState('all');
 
+    const handleClearHistory = async () => {
+        const result = await Swal.fire({
+            title: 'Clear Chat History?',
+            text: 'This action cannot be undone. All your chat history will be permanently deleted.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, clear it!',
+            cancelButtonText: 'Cancel',
+            background: '#fff',
+            customClass: {
+                popup: 'swal-popup'
+            }
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await clearChatHistory(token);
+                setConversations([]);
+                Swal.fire({
+                    title: 'Cleared!',
+                    text: 'Your chat history has been cleared successfully.',
+                    icon: 'success',
+                    confirmButtonColor: '#667eea',
+                    background: '#fff',
+                    customClass: {
+                        popup: 'swal-popup'
+                    }
+                });
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to clear chat history. Please try again.',
+                    confirmButtonColor: '#667eea',
+                    background: '#fff',
+                    customClass: {
+                        popup: 'swal-popup'
+                    }
+                });
+            }
+        }
+    };
+
     useEffect(() => {
         const fetchHistory = async () => {
             try {
@@ -130,13 +176,8 @@ const ProfilePage = () => {
 
     const totalChats = Array.isArray(conversations) ? conversations.length : 0;
 
-    const allCategories = Array.from(new Set(
-        conversations.flatMap(conv =>
-            Array.isArray(conv.messages)
-                ? conv.messages.map(msg => msg.category || 'general')
-                : []
-        )
-    ));
+    // Use specific categories: refrigerator, dishwasher, payment
+    const categories = ['refrigerator', 'dishwasher', 'payment'];
 
     const filteredConversations = categoryFilter === 'all'
         ? conversations
@@ -156,24 +197,98 @@ const ProfilePage = () => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '16px' }}>
                     <div style={{ background: 'linear-gradient(90deg, #e0eafc 0%, #cfdef3 100%)', borderRadius: '16px', padding: '22px 38px', boxShadow: '0 4px 16px rgba(60,80,120,0.10)', fontWeight: 700, color: '#1b3875', fontSize: '1.25rem', fontFamily: 'inherit' }}>
-                        <span aria-label="chat" title="Chats" style={{ fontSize: '1.5rem', marginRight: '8px' }}>💬</span> Chats: {filteredConversations.length}
+                        <span aria-label="chat" title="Chats" style={{ fontSize: '1.5rem', marginRight: '8px' }}>�</span> Chats: {filteredConversations.length}
                     </div>
                 </div>
                 <div style={{ textAlign: 'left', margin: '0 48px' }}>
-                    <h2 style={{ color: '#1b3875', fontWeight: 800, fontSize: '1.7rem', marginBottom: '18px', letterSpacing: '0.03em', fontFamily: 'inherit' }}>Recent Conversations</h2>
-                    <div style={{ marginBottom: '18px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+                        <h2 style={{ color: '#1b3875', fontWeight: 800, fontSize: '1.7rem', margin: 0, letterSpacing: '0.03em', fontFamily: 'inherit' }}>Recent Conversations</h2>
+                        <button
+                            onClick={handleClearHistory}
+                            style={{
+                                padding: '12px 24px',
+                                borderRadius: '12px',
+                                border: 'none',
+                                background: 'linear-gradient(90deg, #dc2626 0%, #ef4444 100%)',
+                                color: '#fff',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                fontSize: '1rem',
+                                boxShadow: '0 4px 16px rgba(220, 38, 38, 0.2)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                            onMouseOut={(e) => e.target.style.transform = 'translateY(0px)'}
+                        >
+                            🗑️ Clear History
+                        </button>
+                    </div>
+                    <div style={{ marginBottom: '18px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <span style={{ fontWeight: 600, fontSize: '1.08rem', color: '#3a7bd5' }}>Filter by category:</span>
                         <button
-                            style={{ padding: '8px 18px', borderRadius: '999px', border: 'none', background: categoryFilter === 'all' ? '#ede9fe' : '#f3f4f6', color: '#1b3875', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(60,80,120,0.07)' }}
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'all' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'all' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
                             onClick={() => setCategoryFilter('all')}
-                        >All</button>
-                        {allCategories.map(cat => (
-                            <button
-                                key={cat}
-                                style={{ padding: '8px 18px', borderRadius: '999px', border: 'none', background: categoryFilter === cat ? '#ede9fe' : '#f3f4f6', color: '#1b3875', fontWeight: 600, cursor: 'pointer', boxShadow: '0 2px 8px rgba(60,80,120,0.07)' }}
-                                onClick={() => setCategoryFilter(cat)}
-                            >{cat.charAt(0).toUpperCase() + cat.slice(1)}</button>
-                        ))}
+                        >
+                            All
+                        </button>
+                        <button
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'refrigerator' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'refrigerator' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onClick={() => setCategoryFilter('refrigerator')}
+                        >
+                            🧊 Refrigerator
+                        </button>
+                        <button
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'dishwasher' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'dishwasher' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onClick={() => setCategoryFilter('dishwasher')}
+                        >
+                            🍽️ Dishwasher
+                        </button>
+                        <button
+                            style={{ 
+                                padding: '8px 18px', 
+                                borderRadius: '999px', 
+                                border: 'none', 
+                                background: categoryFilter === 'payment' ? 'linear-gradient(90deg, #1b3875 0%, #3a7bd5 100%)' : '#f3f4f6', 
+                                color: categoryFilter === 'payment' ? '#fff' : '#1b3875', 
+                                fontWeight: 600, 
+                                cursor: 'pointer', 
+                                boxShadow: '0 2px 8px rgba(60,80,120,0.07)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onClick={() => setCategoryFilter('payment')}
+                        >
+                            💳 Payment
+                        </button>
                     </div>
                     {(!Array.isArray(filteredConversations) || filteredConversations.length === 0) && (
                         <div style={{ textAlign: 'center', color: '#555', fontSize: '1.2rem' }}>No chat history yet.</div>

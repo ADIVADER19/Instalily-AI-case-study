@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import '../App.css';
 
 const SignupPage = () => {
     const [username, setUsername] = useState('');
@@ -14,10 +15,11 @@ const SignupPage = () => {
             await axios.post('/api/signup', { username, password });
             Swal.fire({
                 icon: 'success',
-                title: 'Signup Successful',
+                title: 'Account Created!',
                 text: 'Redirecting to login...',
                 timer: 1800,
-                showConfirmButton: false
+                showConfirmButton: false,
+                confirmButtonColor: '#1b3875'
             });
             setTimeout(() => navigate('/login'), 1800);
         } catch (err) {
@@ -25,6 +27,7 @@ const SignupPage = () => {
                 icon: 'error',
                 title: 'Signup Failed',
                 text: err.response?.data?.error || 'Signup failed',
+                confirmButtonColor: '#1b3875'
             });
         }
     };
@@ -32,23 +35,25 @@ const SignupPage = () => {
     return (
         <div className="auth-page">
             <div className="auth-form">
-                <h2>Signup</h2>
+                <h2>Create Account</h2>
                 <form onSubmit={handleSignup}>
                     <input
                         type="text"
-                        placeholder="Username"
+                        placeholder="Choose a username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
+                        minLength="3"
                     />
                     <input
                         type="password"
-                        placeholder="Password"
+                        placeholder="Choose a password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        minLength="6"
                     />
-                    <button type="submit">Signup</button>
+                    <button type="submit">Create Account</button>
                 </form>
                 <p>
                     Already have an account? <a href="/login">Login</a>

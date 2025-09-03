@@ -2,71 +2,56 @@ const ChatService = require('../services/ChatService');
 
 class ChatController {
     static async chat(req, res) {
-        console.log('Received chat request:', req.body);
-        console.log('User:', req.user);
-        
-        const { message } = req.body;
-        const { username } = req.user;
-
-        if (!message || !message.trim()) {
-            return res.status(400).json({ error: 'Message is required' });
-        }
-
-        const result = await ChatService.processMessage(message, username);
-        
-        if (result.success) {
-            res.json({ 
-                response: result.response, 
-                category: result.category 
-            });
-        } else {
-            res.status(500).json({ error: result.error });
+        try {
+            const { message } = req.body;
+            const { username } = req.user;
+            
+            const result = await ChatService.processChat(message, username);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
     }
 
-    static async getChatHistory(req, res) {
-        const { username } = req.user;
-        
-        const result = await ChatService.getChatHistory(username);
-        
-        if (result.success) {
-            res.json(result.history);
-        } else {
-            res.status(500).json({ error: result.error });
+    static async getHistory(req, res) {
+        try {
+            const history = await ChatService.getChatHistory(req.user.username);
+            res.json(history);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
     }
 
     static async recommend(req, res) {
-        const { message } = req.body;
-        const { username } = req.user;
-
-        if (!message || !message.trim()) {
-            return res.status(400).json({ error: 'Message is required' });
-        }
-
-        const result = await ChatService.getRecommendation(message, username);
-        
-        if (result.success) {
-            res.json({ recommendation: result.recommendation });
-        } else {
-            res.status(500).json({ error: result.error });
+        try {
+            const { message } = req.body;
+            const { username } = req.user;
+            
+            const result = await ChatService.getRecommendation(message, username);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
     }
 
     static async troubleshoot(req, res) {
-        const { message } = req.body;
-        const { username } = req.user;
-
-        if (!message || !message.trim()) {
-            return res.status(400).json({ error: 'Message is required' });
+        try {
+            const { message } = req.body;
+            const { username } = req.user;
+            
+            const result = await ChatService.getTroubleshooting(message, username);
+            res.json(result);
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
+    }
 
-        const result = await ChatService.getTroubleshooting(message, username);
-        
-        if (result.success) {
-            res.json({ troubleshooting: result.troubleshooting });
-        } else {
-            res.status(500).json({ error: result.error });
+    static async clearHistory(req, res) {
+        try {
+            await ChatService.clearChatHistory(req.user.username);
+            res.json({ message: 'Chat history cleared successfully' });
+        } catch (error) {
+            res.status(500).json({ error: error.message });
         }
     }
 }

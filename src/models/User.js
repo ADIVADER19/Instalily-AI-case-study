@@ -68,6 +68,14 @@ const ChatHistory = {
     async getHistory(username) {
         const userDoc = await UserModel.findOne({ username });
         return userDoc ? userDoc.messages : [];
+    },
+
+    async clearHistory(username) {
+        const userDoc = await UserModel.findOne({ username });
+        if (!userDoc) return;
+        userDoc.messages = [];
+        await userDoc.save();
+        return { message: 'Chat history cleared successfully' };
     }
 };
 

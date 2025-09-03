@@ -1,5 +1,5 @@
 class TestController {
-    static async test(req, res) {
+    static test(req, res) {
         res.json({ 
             message: 'API is working!', 
             timestamp: new Date().toISOString() 
