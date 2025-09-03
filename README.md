@@ -83,7 +83,7 @@ A modern AI-powered customer support platform built with React and Node.js, feat
 Create a `.env` file in the root directory:
 
 ```env
-MONGODB_URI=mongodb://localhost:27017/instalily
+MONGODB_URI=mongodb atlas url
 JWT_SECRET=your_jwt_secret_key
 DEEPSEEK_API_KEY=your_deepseek_api_key
 ```
